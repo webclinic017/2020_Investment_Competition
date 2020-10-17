@@ -34,12 +34,18 @@ with open('constituents_csv.csv', 'r', newline='') as csvfile:
         if "Symbol" in sp_list: sp_list.remove("Symbol")
 
 
-ticker = "MSFT"
+ticker = "LYV"
 
 df_roe = df_inc.loc[ticker][NET_INCOME] / df_bal.loc[ticker][TOTAL_EQUITY]
 
+print(df_roe)
+
 roe_array = df_roe.to_numpy()
-count_array = np.array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]).reshape(-1, 1)
+
+placeholder_array = []
+for i in range(len(df_roe.index)):
+    placeholder_array.append(i)
+count_array = np.array([placeholder_array]).reshape(-1, 1)
 
 model = LinearRegression()
 model.fit(count_array, roe_array)
@@ -50,9 +56,9 @@ r_value = math.sqrt(model.score(count_array, roe_array))
 
 print('Slope:', coef, " - Int: ", intercept, " - R: ", r_value, " - R^2: ", model.score(count_array, roe_array), math.pow(r_value, 2))
 
-finap_y = intercept + 19*coef
+finap_y = intercept + 19 * coef
 
-plt.plot(count_array, roe_array)
+plt.scatter(count_array, roe_array)
 plt.axline([0, intercept], [19, finap_y])
 plt.show()
 
