@@ -121,8 +121,8 @@ class Analysis:
 
                             projected_eps = eps2 * math.pow(1 + cagr_eps, projected_n)
 
-                            pe_min = 5
-                            pe_max = 10
+                            pe_min = 10
+                            pe_max = 20
 
                             projected_price_min = projected_eps * pe_min
                             projected_price_max = projected_eps * pe_max
