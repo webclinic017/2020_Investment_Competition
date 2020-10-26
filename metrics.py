@@ -5,6 +5,8 @@ SYMBOL = "symbol"
 
 YEAR = "year"
 PERIOD = "period"
+FREQ = "freq"
+
 #============ Balance Sheet Metrics ============#
 
 ACCOUTNS_PAYABLE = "accountsPayable"
@@ -86,3 +88,10 @@ OTHER_FUNDS_FINANCING_ITEMS = "otherFundsFinancingItems"
 OTHER_FUNDS_NON_CASH_ITEMS = "otherFundsNonCashItems"
 OTHER_INVESTING_CASH_FLOW_ITEMS_TOTAL = "otherInvestingCashFlowItemsTotal"
 
+#============ Revenue Estimates ============#
+
+NUMBER_ANALYSTS = "numberAnalysts"
+PERIOD = "period"
+REVENUE_AVG = "revenueAvg"
+REVENUE_HIGH = "revenueHigh"
+REVENUE_LOW = "revenueLow"

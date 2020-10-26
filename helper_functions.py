@@ -87,48 +87,48 @@ def write_financials(input_file_path, output_file_path, data = 'bs', time = 'ann
             
             # check if ticker is contained in database
             try:
-                for year in json_data["financials"]:
+                for section in json_data["financials"]:
                     csv_writer.writerow([
                         ticker,
-                        getValue(year, YEAR),
-                        getValue(year, PERIOD),
-                        getValue(year, ACCOUTNS_PAYABLE),
-                        getValue(year, ACCOUNTS_RECEIVABLES),
-                        getValue(year, ACCRUED_LIABILITY),
-                        getValue(year, ACCUMULATED_DEPRECIATION),
-                        getValue(year, CASH_EQUIVALENTS),
-                        getValue(year, CASH_SHORT_TERM_INVESTMENTS),
-                        getValue(year, COMMON_STOCK),
-                        getValue(year, CURRENT_ASSETS),
-                        getValue(year, CURRENT_LIABILITIES),
-                        getValue(year, CURRENT_PORTION_LONG_TERM_DEBT),
-                        getValue(year, DEFERRED_INCOME_TAX),
-                        getValue(year, GOODWILL),
-                        getValue(year, INTANGIBLES_ASSETS),
-                        getValue(year, INVENTORY),
-                        getValue(year, LIABILITIES_SHAREHOLDERS_EQUITY),
-                        getValue(year, LONG_TERM_DEBT),
-                        getValue(year, LONG_TERM_INVESTMENTS),
-                        getValue(year, OTHER_CURRENT_ASSETS),
-                        getValue(year, OTHER_CURRENT_LIABILITIES),
-                        getValue(year, OTHER_EQUITY),
-                        getValue(year, OTHER_LIABILITIES),
-                        getValue(year, OTHER_LONG_TERM_ASSETS),
-                        getValue(year, OTHER_RECEIVABLES),
-                        getValue(year, PERIOD),
-                        getValue(year, PROPERTY_PLANT_EQUIPMENT),
-                        getValue(year, RETAINED_EARNINGS),
-                        getValue(year, SHARES_OUTSTANDING),
-                        getValue(year, SHORT_TERM_DEBT),
-                        getValue(year, SHORT_TERM_INVESTMENTS),
-                        getValue(year, TANGIBLE_BOOK_VALUE_PERSHARE),
-                        getValue(year, TOTAL_ASSETS),
-                        getValue(year, TOTAL_DEBT),
-                        getValue(year, TOTAL_EQUITY),
-                        getValue(year, TOTAL_LIABILITIES),
-                        getValue(year, TOTAL_LONG_TERM_DEBT),
-                        getValue(year, TOTAL_RECEIVABLES),
-                        getValue(year, TREASURY_STOCK)
+                        getValue(section, YEAR),
+                        getValue(section, PERIOD),
+                        getValue(section, ACCOUTNS_PAYABLE),
+                        getValue(section, ACCOUNTS_RECEIVABLES),
+                        getValue(section, ACCRUED_LIABILITY),
+                        getValue(section, ACCUMULATED_DEPRECIATION),
+                        getValue(section, CASH_EQUIVALENTS),
+                        getValue(section, CASH_SHORT_TERM_INVESTMENTS),
+                        getValue(section, COMMON_STOCK),
+                        getValue(section, CURRENT_ASSETS),
+                        getValue(section, CURRENT_LIABILITIES),
+                        getValue(section, CURRENT_PORTION_LONG_TERM_DEBT),
+                        getValue(section, DEFERRED_INCOME_TAX),
+                        getValue(section, GOODWILL),
+                        getValue(section, INTANGIBLES_ASSETS),
+                        getValue(section, INVENTORY),
+                        getValue(section, LIABILITIES_SHAREHOLDERS_EQUITY),
+                        getValue(section, LONG_TERM_DEBT),
+                        getValue(section, LONG_TERM_INVESTMENTS),
+                        getValue(section, OTHER_CURRENT_ASSETS),
+                        getValue(section, OTHER_CURRENT_LIABILITIES),
+                        getValue(section, OTHER_EQUITY),
+                        getValue(section, OTHER_LIABILITIES),
+                        getValue(section, OTHER_LONG_TERM_ASSETS),
+                        getValue(section, OTHER_RECEIVABLES),
+                        getValue(section, PERIOD),
+                        getValue(section, PROPERTY_PLANT_EQUIPMENT),
+                        getValue(section, RETAINED_EARNINGS),
+                        getValue(section, SHARES_OUTSTANDING),
+                        getValue(section, SHORT_TERM_DEBT),
+                        getValue(section, SHORT_TERM_INVESTMENTS),
+                        getValue(section, TANGIBLE_BOOK_VALUE_PERSHARE),
+                        getValue(section, TOTAL_ASSETS),
+                        getValue(section, TOTAL_DEBT),
+                        getValue(section, TOTAL_EQUITY),
+                        getValue(section, TOTAL_LIABILITIES),
+                        getValue(section, TOTAL_LONG_TERM_DEBT),
+                        getValue(section, TOTAL_RECEIVABLES),
+                        getValue(section, TREASURY_STOCK)
                         ])
             except:
                 print(ticker, ", not found")
@@ -248,6 +248,47 @@ def write_financials(input_file_path, output_file_path, data = 'bs', time = 'ann
                     ])
             except:
                 print(ticker, ", not found")
+
+def write_estimates(input_file_path, output_file_path, frequency = 'annual'):
+    
+    # Setup client
+    finnhub_client = finnhub.Client(api_key="btts0j748v6ojt2hie60")
+
+    input_csv = open(input_file_path, "r", newline = '')
+    output_csv = open(output_file_path, "w", newline = '')
+
+    ticker_reader = csv.reader(input_csv, delimiter=' ', quotechar='|')
+    csv_writer = csv.writer(output_csv, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+    # Writing headers of CSV file 
+    csv_writer.writerow([
+        SYMBOL,
+        PERIOD,
+        NUMBER_ANALYSTS,
+        REVENUE_AVG,
+        REVENUE_HIGH,
+        REVENUE_LOW
+    ]) 
+
+    # writing down companeis listed in input ticker csv file
+    for ticker in ticker_reader:
+        json_data = finnhub_client.company_revenue_estimates(ticker, frequency) # obtaining data from Finnhub API
+        ticker = json_data[SYMBOL] # getting ticker
+        
+        # check if ticker is contained in database
+        try:
+            for section in json_data["data"]:
+                csv_writer.writerow([
+                    ticker,
+                    getValue(section, PERIOD),
+                    getValue(section, NUMBER_ANALYSTS),
+                    getValue(section, REVENUE_AVG),
+                    getValue(section, REVENUE_HIGH),
+                    getValue(section, REVENUE_LOW)
+                ])
+        except:
+            print(ticker, ", not found")
+
 
 
 
