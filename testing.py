@@ -61,5 +61,3 @@ finap_y = intercept + 19 * coef
 plt.scatter(count_array, roe_array)
 plt.axline([0, intercept], [19, finap_y])
 plt.show()
-
-
