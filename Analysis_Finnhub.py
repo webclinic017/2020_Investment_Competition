@@ -148,5 +148,6 @@ class Analysis_Finnhub:
 
 if __name__ == "__main__":
     analysis = Analysis_Finnhub("utilities_balance.csv", "utilities_income.csv", "utilities_cashflows.csv", "utilities_estimates.csv")
-    plt.hist(analysis.monte_carlo_DCF('PG'), bins = 30, density = True, color = "r")
+    plt.hist(analysis.monte_carlo_DCF('CASY'), bins = 30, density = True, color = "r")
+    plt.savefig("/Users/ezzatsuhaime/Desktop/picture.png")
     plt.show()
