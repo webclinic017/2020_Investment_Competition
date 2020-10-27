@@ -2,13 +2,11 @@
 SYMBOL = "symbol"
 
 #============ Time ============#
-
 YEAR = "year"
 PERIOD = "period"
 FREQ = "freq"
 
 #============ Balance Sheet Metrics ============#
-
 ACCOUTNS_PAYABLE = "accountsPayable"
 ACCOUNTS_RECEIVABLES = "accountsReceivables"
 ACCRUED_LIABILITY = "accruedLiability"
@@ -49,7 +47,6 @@ TREASURY_STOCK = "treasuryStock"
 
 
 #============ Income Statement Metrics ============#
-
 COST_OF_GOODS_SOLD = 'costOfGoodsSold'
 DILUTED_AVERAGE_SHARES_OUTSTANDING = 'dilutedAverageSharesOutstanding'
 DILUTED_EPS = 'dilutedEPS'
@@ -68,7 +65,6 @@ TOTAL_OPERATING_EXPENSE = "totalOperatingExpense"
 TOTAL_OTHER_INCOME_EXPENSE_NET = "totalOtherIncomeExpenseNet"
 
 #============ Cash Flow Statement Metrics ============#
-
 CAPEX = "capex"
 CASH_DIVIDENDS_PAID = "cashDividendsPaid"
 CASH_INTEREST_PAID = "cashInterestPaid"
@@ -89,9 +85,18 @@ OTHER_FUNDS_NON_CASH_ITEMS = "otherFundsNonCashItems"
 OTHER_INVESTING_CASH_FLOW_ITEMS_TOTAL = "otherInvestingCashFlowItemsTotal"
 
 #============ Revenue Estimates ============#
-
 NUMBER_ANALYSTS = "numberAnalysts"
 PERIOD = "period"
 REVENUE_AVG = "revenueAvg"
 REVENUE_HIGH = "revenueHigh"
 REVENUE_LOW = "revenueLow"
+
+
+#============ Basic Financials ============#
+PE_BASIC_EXCL_EXTRA_TTM = "peBasicExclExtraTTM"
+PE_EXCL_EXTRA_ANNUAL = "peExclExtraAnnual"
+PE_EXCL_EXTRA_HIGH_TTM = "peExclExtraHighTTM"
+PE_EXCL_EXTRA_TTM = "peExclExtraTTM"
+PE_EXCL_LOW_TTM = "peExclLowTTM"
+PE_INCL_EXTRA_TTM = "peInclExtraTTM"
+PE_NORMALIZED_ANNUAL = "peNormalizedAnnual"

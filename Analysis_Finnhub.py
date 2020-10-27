@@ -6,22 +6,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class Analysis_Finnhub:
-    def __init__(self, balance, income, cashflow, estimate):
+    def __init__(self, balance, income_ttm, income_annual, cashflows_ttm, cashflows_annual, estimates):
         with open(balance, "r", newline = '') as csv_balance:
             self.balance_df = pd.read_csv(csv_balance)
             self.balance_df.set_index([SYMBOL], inplace=True)
 
-        with open(income, "r", newline = '') as csv_income:
-            self.income_df = pd.read_csv(csv_income)
-            self.income_df.set_index([SYMBOL], inplace=True)
+        with open(income_ttm, "r", newline = '') as csv_income:
+            self.income_ttm_df = pd.read_csv(csv_income)
+            self.income_ttm_df.set_index([SYMBOL], inplace=True)
 
-        with open(cashflow, "r", newline = '') as csv_cashflows:
-            self.cashflows_df = pd.read_csv(csv_cashflows)
-            self.cashflows_df.set_index([SYMBOL], inplace=True)
+        with open(income_annual, "r", newline = '') as csv_income:
+            self.income_annual_df = pd.read_csv(csv_income)
+            self.income_annual_df.set_index([SYMBOL], inplace=True)
 
-        with open(estimate, "r", newline = '') as csv_estimate:
+        with open(cashflows_ttm, "r", newline = '') as csv_cashflows:
+            self.cashflows_ttm_df = pd.read_csv(csv_cashflows)
+            self.cashflows_ttm_df.set_index([SYMBOL], inplace=True)
+
+        with open(cashflows_annual, "r", newline = '') as csv_cashflows:
+            self.cashflows_annual_df = pd.read_csv(csv_cashflows)
+            self.cashflows_annual_df.set_index([SYMBOL], inplace=True)
+
+        with open(estimates, "r", newline = '') as csv_estimate:
             self.estimates_df = pd.read_csv(csv_estimate)
             self.estimates_df.set_index([SYMBOL], inplace=True)
+
+        
 
     def monte_carlo_DCF(self, ticker):
 
@@ -29,17 +39,14 @@ class Analysis_Finnhub:
         company_balance_df = self.balance_df.loc[ticker]
         period = company_balance_df.iloc[0][PERIOD]  # important to get the time period of the company
         company_balance_df.set_index(PERIOD, inplace=True)
-        
 
         #===== Company Incomes =====#
-        company_income_df = self.income_df.loc[ticker]
+        company_income_df = self.income_ttm_df.loc[ticker]
         company_income_df.set_index(PERIOD, inplace=True)
         
-        
         #===== Company Cashflows =====#
-        company_cashflow_df = self.cashflows_df.loc[ticker]
+        company_cashflow_df = self.cashflows_ttm_df.loc[ticker]
         company_cashflow_df.set_index(PERIOD, inplace=True)
-        
 
         #===== Company Estimates =====#
         company_estimates_df = self.estimates_df.loc[ticker]
@@ -144,6 +151,46 @@ class Analysis_Finnhub:
             output_dcfDistribution.append(dcf_value)
         
         return output_dcfDistribution
+
+
+    def buffett(self, ticker):
+        #===== Company Balances =====#
+        company_balance_df = self.balance_df.loc[ticker]
+        company_balance_df.set_index(YEAR, inplace=True)
+
+        #===== Company Incomes =====#
+        company_income_df = self.income_annual_df.loc[ticker]
+        company_income_df.set_index(PERIOD, inplace=True)
+        
+        #===== Company Cashflows =====#
+        company_cashflow_df = self.cashflows_annual_df.loc[ticker]
+        company_cashflow_df.set_index(PERIOD, inplace=True)
+
+        #===== Company Estimates =====#
+        company_estimates_df = self.estimates_df.loc[ticker]
+
+
+        #===== Company ROE =====#
+        roe_df = company_income_df[NET_INCOME] / company_balance_df[TOTAL_EQUITY]
+        roe_array = roe_df.to_numpy()
+
+        #===== Company EPS =====#
+        eps_df = company_income_df[NET_INCOME] / company_balance[SHARES_OUTSTANDING]
+        eps_array = eps_df.to_numpy()
+
+        #===== MIN & MAX PE RATIOS =====#
+        #get pe ratio min max 10 years
+
+        
+        
+        #analysis
+
+        #correlation
+        #correlation
+
+        #cagr
+
+        #cagr
 
 
 if __name__ == "__main__":

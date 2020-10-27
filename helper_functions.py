@@ -23,10 +23,10 @@ def get_us_tickers(input_file_path, output_file_path):
 
 
 
-def write_financials(input_file_path, output_file_path, data = 'bs', time = 'annual'):
+def write_financials(client, input_file_path, output_file_path, data = 'bs', time = 'annual'):
 
     # Setup client
-    finnhub_client = finnhub.Client(api_key="btts0j748v6ojt2hie60")
+    finnhub_client = client
 
     input_csv = open(input_file_path, "r", newline = '')
     output_csv = open(output_file_path, "w", newline = '')
@@ -249,10 +249,10 @@ def write_financials(input_file_path, output_file_path, data = 'bs', time = 'ann
             except:
                 print(ticker, ", not found")
 
-def write_estimates(input_file_path, output_file_path, frequency = 'annual'):
+def write_estimates(client, input_file_path, output_file_path, frequency = 'annual'):
     
     # Setup client
-    finnhub_client = finnhub.Client(api_key="btts0j748v6ojt2hie60")
+    finnhub_client = client
 
     input_csv = open(input_file_path, "r", newline = '')
     output_csv = open(output_file_path, "w", newline = '')
@@ -289,7 +289,48 @@ def write_estimates(input_file_path, output_file_path, frequency = 'annual'):
         except:
             print(ticker, ", not found")
 
+def write_basic_financials(client, input_file_path, output_file_path):
+    
+    # Setup client
+    finnhub_client = client
 
+    input_csv = open(input_file_path, "r", newline = '')
+    output_csv = open(output_file_path, "w", newline = '')
+
+    ticker_reader = csv.reader(input_csv, delimiter=' ', quotechar='|')
+    csv_writer = csv.writer(output_csv, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+    # Writing headers of CSV file 
+    csv_writer.writerow([
+        PE_BASIC_EXCL_EXTRA_TTM,
+        PE_EXCL_EXTRA_ANNUAL,
+        PE_EXCL_EXTRA_HIGH_TTM,
+        PE_EXCL_EXTRA_TTM,
+        PE_EXCL_LOW_TTM,
+        PE_INCL_EXTRA_TTM,
+        PE_NORMALIZED_ANNUAL
+    ]) 
+
+    # writing down companeis listed in input ticker csv file
+    for ticker in ticker_reader:
+        json_data = finnhub_client.company_revenue_estimates(ticker, frequency) # obtaining data from Finnhub API
+        ticker = json_data[SYMBOL] # getting ticker
+        
+        # check if ticker is contained in database
+        try:
+            for section in json_data["data"]:
+                csv_writer.writerow([
+                    ticker,
+                    getValue(section, PE_BASIC_EXCL_EXTRA_TTM),
+                    getValue(section, PE_EXCL_EXTRA_ANNUAL),
+                    getValue(section, PE_EXCL_EXTRA_HIGH_TTM),
+                    getValue(section, PE_EXCL_EXTRA_TTM),
+                    getValue(section, PE_EXCL_LOW_TTM),
+                    getValue(section, PE_INCL_EXTRA_TTM),
+                    getValue(section, PE_NORMALIZED_ANNUAL)
+                ])
+        except:
+            print(ticker, ", not found")
 
 
 def getValue(list, metric):
