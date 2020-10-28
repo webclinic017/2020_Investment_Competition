@@ -1,12 +1,18 @@
 import csv
+import math
+import finnhub
 import datetime
 from metrics import *
 import pandas as pd
 import numpy as np
+from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 
 class Analysis_Finnhub:
-    def __init__(self, balance, income_ttm, income_annual, cashflows_ttm, cashflows_annual, estimates):
+    def __init__(self, client, balance, income_ttm, income_annual, cashflows_ttm, cashflows_annual, estimates):
+        
+        self.finnhub_client = client
+        
         with open(balance, "r", newline = '') as csv_balance:
             self.balance_df = pd.read_csv(csv_balance)
             self.balance_df.set_index([SYMBOL], inplace=True)
@@ -153,18 +159,24 @@ class Analysis_Finnhub:
         return output_dcfDistribution
 
 
-    def buffett(self, ticker):
+    def buffett(self, ticker, csv_output_file):
+
+        #===== CSV FILE =====#
+        with open(csv_output_file, 'w', newline = '') as output_f:
+            csv_writer = csv.writer(output_f)
+            csv_writer.writerow(["Ticker", "N", "CAGR EPS", "PE MIN", "PE MAX", "P AGR MIN", "P AGR MAX"])
+
         #===== Company Balances =====#
         company_balance_df = self.balance_df.loc[ticker]
         company_balance_df.set_index(YEAR, inplace=True)
 
         #===== Company Incomes =====#
         company_income_df = self.income_annual_df.loc[ticker]
-        company_income_df.set_index(PERIOD, inplace=True)
+        company_income_df.set_index(YEAR, inplace=True)
         
         #===== Company Cashflows =====#
         company_cashflow_df = self.cashflows_annual_df.loc[ticker]
-        company_cashflow_df.set_index(PERIOD, inplace=True)
+        company_cashflow_df.set_index(YEAR, inplace=True)
 
         #===== Company Estimates =====#
         company_estimates_df = self.estimates_df.loc[ticker]
@@ -172,29 +184,103 @@ class Analysis_Finnhub:
 
         #===== Company ROE =====#
         roe_df = company_income_df[NET_INCOME] / company_balance_df[TOTAL_EQUITY]
-        roe_array = roe_df.to_numpy()
+        roe_array = roe_df.to_numpy()[0:10]
 
         #===== Company EPS =====#
-        eps_df = company_income_df[NET_INCOME] / company_balance[SHARES_OUTSTANDING]
-        eps_array = eps_df.to_numpy()
+        eps_df = company_income_df[NET_INCOME] / company_balance_df[SHARES_OUTSTANDING]
+        eps_array = eps_df.to_numpy()[0:10]
+
+        #===== PLACEHOLDER ARRAY =====#
+        placeholder_array = []
+        for i in range(len(roe_array)):
+            placeholder_array.append(i)
+        # put placeholder array in a numpy array
+        count_array = np.array(placeholder_array).reshape(-1, 1)
 
         #===== MIN & MAX PE RATIOS =====#
         #get pe ratio min max 10 years
+        pe_min = 10
+        pe_max = 30
 
+        #===== CURRENT PRICE =====#
+        cur_price = self.finnhub_client.quote(ticker)
         
-        
-        #analysis
+        #=============== ANALYSIS ===============#
+       
+        #===== LINEAR REGRESSION =====#
+        # create linear regression models
+        model_roe = LinearRegression()
+        model_eps = LinearRegression()
+        # fit lines from given values
+        model_roe.fit(count_array, roe_array)
+        model_eps.fit(count_array, eps_array)
+        # obtain r values from coefficient of determinations
+        r_value_roe = math.sqrt(model_roe.score(count_array, roe_array))
+        r_value_eps = math.sqrt(model_eps.score(count_array, eps_array))
 
         #correlation
-        #correlation
+        if(r_value_roe >= 0.7 and r_value_eps >= 0.7):
+            a = len(eps_array) - 1 # count for EPS 1 position
+            b = 0 # count for EPS 2 position
+            eps1 = eps_array[a]
+            eps2 = eps_array[b]
+            # find the earliest positive eps and set position accordingly             
+            while(eps1 <= 0):
+                a -= 1
+                try:
+                    eps1 = eps_array[a]
+                except IndexError:
+                    #print(ticker, "eps 1 out of bounds")
+                    break
+            # find the latest positive eps and set position accordingly  
+            while(eps2 <= 0):
+                b += 1
+                try:
+                    eps2 = eps_array[b]
+                except IndexError:
+                    #print(ticker, "eps 2 out of bounds")
+                    break
+            length = a - b + 1 # find differences in position between EPS
 
-        #cagr
+            # find CAGR of EPS 1, EPS 2, and length
+            if(eps1 > 0 and eps2 > 0 and length > 2):
+                cagr_eps = math.pow(eps1 / eps2, 1 / length) - 1
+                    
+                # perform further analysis if CAGR is greater than 0%
+                if(cagr_eps > 0):
+                    projected_n = 10
 
-        #cagr
+                    projected_eps = eps2 * math.pow(1 + cagr_eps, projected_n)
+                    
+                    projected_price_min = projected_eps * pe_min
+                    projected_price_max = projected_eps * pe_max
+
+                    p_agr_min = 100 * (math.pow(projected_price_min/cur_price, 1 / projected_n) - 1)
+                    p_agr_max = 100 * (math.pow(projected_price_max/cur_price, 1 / projected_n) - 1)
+                    
+                    if(p_agr_min > 0):
+                        print(ticker, "- Projected growth max:", p_agr_max)
+                        csv_writer.writerow([ticker, length, cagr_eps, pe_min, pe_max, p_agr_min, p_agr_max])
+
+                    else:
+                        print(ticker, "- Projected annual growth rate is negative")
+
+                else:
+                    print(ticker, "- CAGR is negative")
+
+            else:
+                print(ticker, "- EPS is negative or n is 2 or less")
+
+        else:
+            print(ticker, "- no strong correlation")
 
 
 if __name__ == "__main__":
-    analysis = Analysis_Finnhub("utilities_balance.csv", "utilities_income.csv", "utilities_cashflows.csv", "utilities_estimates.csv")
-    plt.hist(analysis.monte_carlo_DCF('CASY'), bins = 30, density = True, color = "r")
-    plt.savefig("/Users/ezzatsuhaime/Desktop/picture.png")
-    plt.show()
+    client = finnhub.Client(api_key="bucae7f48v6oa2u4ng20")
+    analysis = Analysis_Finnhub(client, "Data/utilities_balance_annual.csv", 
+                                        "Data/utilities_income_ttm.csv", 
+                                        "Data/utilities_income_annual.csv",
+                                        "Data/utilities_cashflows_ttm.csv", 
+                                        "Data/utilities_cashflows_annual.csv", 
+                                        "Data/utilities_estimates.csv")
+    analysis.buffett('CPB', 'whoah.csv')
