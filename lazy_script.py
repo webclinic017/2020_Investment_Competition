@@ -2,7 +2,7 @@ from helper_functions import write_financials, write_estimates
 import finnhub
 
 finnhub_client = finnhub.Client(api_key="bucae7f48v6oa2u4ng20")
-
+print(finnhub_client.quote("AAPL")["c"])
 #print(finnhub_client.company_basic_financials('AAPL', 'cashRatio'))
 #print(finnhub_client.company_revenue_estimates('TSLA', freq='annual'))
 

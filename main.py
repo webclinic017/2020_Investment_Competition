@@ -30,11 +30,19 @@ ana = analysis.Analysis_Finnhub(finnhub_client, "Data/{}_balance_annual.csv".for
 #=============== ANALYSIS ===============#
 with open(us_tickers, "r", newline = '') as ticker_file:
     ticker_reader = csv.reader(ticker_file, delimiter=' ', quotechar='|')
+    
+    #===== CSV FILE =====#
+    output_f = open("Output/output.csv", 'w', newline = '')
+    csv_writer = csv.writer(output_f)
+    csv_writer.writerow(["Ticker", "N", "CAGR EPS", "PE MIN", "PE MAX", "P AGR MIN", "P AGR MAX"])
 
     for row in ticker_reader:
         ticker = row[0]
-
-        ana.buffett(ticker, "Output/output.csv")
+        data_array = ana.buffett(ticker)
+        try:
+            csv_writer.writerow(data_array)
+        except Exception as e:
+            print(e)
 
 """
     document.add_heading("TICKER: {}".format(ticker), level=1)
