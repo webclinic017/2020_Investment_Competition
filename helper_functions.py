@@ -313,7 +313,7 @@ def write_basic_financials(client, input_file_path, output_file_path):
 
     # writing down companeis listed in input ticker csv file
     for ticker in ticker_reader:
-        json_data = finnhub_client.company_revenue_estimates(ticker, frequency) # obtaining data from Finnhub API
+        json_data = finnhub_client.company_revenue_estimates(ticker) # obtaining data from Finnhub API
         ticker = json_data[SYMBOL] # getting ticker
         
         # check if ticker is contained in database

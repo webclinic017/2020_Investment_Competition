@@ -183,12 +183,24 @@ class Analysis_Finnhub:
 
 
         #===== Company ROE =====#
+        roe_array = []
         roe_df = company_income_df[NET_INCOME] / company_balance_df[TOTAL_EQUITY]
-        roe_array = roe_df.to_numpy()[0:10]
+        roe_df = roe_df.dropna() # drop NaN values
+        for i in range(10):
+            try:
+                roe_array = roe_df.to_numpy()[0:i]
+            except:
+                print("ROE too short")
 
         #===== Company EPS =====#
+        eps_array = []
         eps_df = company_income_df[NET_INCOME] / company_balance_df[SHARES_OUTSTANDING]
-        eps_array = eps_df.to_numpy()[0:10]
+        eps_df = eps_df.dropna() # drop NaN values
+        for i in range(10):
+            try:
+                eps_array = eps_df.to_numpy()[0:i]
+            except:
+                print("EPS too short")
 
         #===== PLACEHOLDER ARRAY =====#
         placeholder_array = []
@@ -205,8 +217,9 @@ class Analysis_Finnhub:
         #===== CURRENT PRICE =====#
         cur_price = self.finnhub_client.quote(ticker)
         
+
         #=============== ANALYSIS ===============#
-       
+
         #===== LINEAR REGRESSION =====#
         # create linear regression models
         model_roe = LinearRegression()
@@ -277,10 +290,11 @@ class Analysis_Finnhub:
 
 if __name__ == "__main__":
     client = finnhub.Client(api_key="bucae7f48v6oa2u4ng20")
-    analysis = Analysis_Finnhub(client, "Data/utilities_balance_annual.csv", 
-                                        "Data/utilities_income_ttm.csv", 
-                                        "Data/utilities_income_annual.csv",
-                                        "Data/utilities_cashflows_ttm.csv", 
-                                        "Data/utilities_cashflows_annual.csv", 
-                                        "Data/utilities_estimates.csv")
-    analysis.buffett('CPB', 'whoah.csv')
+    sector = "staples"
+    analysis = Analysis_Finnhub(client, "Data/{}_balance_annual.csv".format(sector), 
+                                        "Data/{}_income_ttm.csv".format(sector), 
+                                        "Data/{}_income_annual.csv".format(sector),
+                                        "Data/{}_cashflows_ttm.csv".format(sector), 
+                                        "Data/{}_cashflows_annual.csv".format(sector), 
+                                        "Data/{}_estimates.csv".format(sector))
+    analysis.buffett('CTVA', 'test_analysis.csv')
