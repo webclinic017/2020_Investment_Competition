@@ -196,6 +196,7 @@ class Analysis_Finnhub:
 
             #===== Company EPS =====#
             eps_array = []
+            '''
             eps_df = company_income_df[NET_INCOME] / company_balance_df[SHARES_OUTSTANDING]
             eps_df = eps_df.dropna().sort_index(ascending=False) # drop NaN values
             for i in range(10):
@@ -203,7 +204,15 @@ class Analysis_Finnhub:
                     eps_array = eps_df.to_numpy()[0:(i+1)]
                 except IndexError:
                     print(ticker, " : EPS not {} length".format(i+1))
-
+            '''
+            eps_df = company_income_df[DILUTED_EPS]
+            eps_df = eps_df.dropna().sort_index(ascending=False) # drop NaN values
+            for i in range(10):
+                try:
+                    eps_array = eps_df.to_numpy()[0:(i+1)]
+                except IndexError:
+                    print(ticker, " : EPS not {} length".format(i+1))
+            
             #===== PLACEHOLDER ARRAYS =====#
             placeholder_array_roe = []
             for i in range(len(roe_array)):
@@ -314,4 +323,4 @@ if __name__ == "__main__":
                                         "Data/{}_cashflows_annual.csv".format(sector), 
                                         "Data/{}_basic_financials.csv".format(sector),
                                         "Data/{}_estimates.csv".format(sector))
-    print(analysis.buffett('SYY'))
+    analysis.buffett('CPB')
