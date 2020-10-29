@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 
 class Analysis_Finnhub:
-    def __init__(self, client, balance, income_ttm, income_annual, cashflows_ttm, cashflows_annual, estimates):
+    def __init__(self, client, balance, income_ttm, income_annual, cashflows_ttm, cashflows_annual, basic_financials, estimates):
         
         self.finnhub_client = client
         
@@ -32,6 +32,10 @@ class Analysis_Finnhub:
         with open(cashflows_annual, "r", newline = '') as csv_cashflows:
             self.cashflows_annual_df = pd.read_csv(csv_cashflows)
             self.cashflows_annual_df.set_index([SYMBOL], inplace=True)
+
+        with open(basic_financials, "r", newline = '') as csv_basic_financials:
+            self.basic_financials_df = pd.read_csv(csv_basic_financials)
+            self.basic_financials_df.set_index([SYMBOL], inplace=True)
 
         with open(estimates, "r", newline = '') as csv_estimate:
             self.estimates_df = pd.read_csv(csv_estimate)
@@ -79,7 +83,7 @@ class Analysis_Finnhub:
                 revenue1 = company_estimates_df.iloc[i][REVENUE_AVG]
                 revenue2 = company_estimates_df.iloc[i+1][REVENUE_AVG]
                 growth_rate_sum += (revenue1 / revenue2)
-            except:
+            except IndexError:
                 print("Error - check revenue growth function")
         sales_growth_rate = growth_rate_sum / 5 # DONE
                 
@@ -173,6 +177,9 @@ class Analysis_Finnhub:
             company_cashflow_df = self.cashflows_annual_df.loc[ticker]
             company_cashflow_df.set_index(YEAR, inplace=True)
 
+            #===== Company Basic Financials =====#
+            company_basic_financials_df = self.basic_financials_df.loc[ticker]
+
             #===== Company Estimates =====#
             company_estimates_df = self.estimates_df.loc[ticker]
 
@@ -180,56 +187,60 @@ class Analysis_Finnhub:
             #===== Company ROE =====#
             roe_array = []
             roe_df = company_income_df[NET_INCOME] / company_balance_df[TOTAL_EQUITY]
-            roe_df = roe_df.dropna() # drop NaN values
+            roe_df = roe_df.dropna().sort_index(ascending=False) # drop NaN values
             for i in range(10):
                 try:
-                    roe_array = roe_df.to_numpy()[0:i]
-                except:
-                    print("ROE too short")
+                    roe_array = roe_df.to_numpy()[0:(i+1)]
+                except IndexError:
+                    print(ticker, " : ROE not {} length".format(i+1))
 
             #===== Company EPS =====#
             eps_array = []
             eps_df = company_income_df[NET_INCOME] / company_balance_df[SHARES_OUTSTANDING]
-            eps_df = eps_df.dropna() # drop NaN values
+            eps_df = eps_df.dropna().sort_index(ascending=False) # drop NaN values
             for i in range(10):
                 try:
-                    eps_array = eps_df.to_numpy()[0:i]
-                except:
-                    print("EPS too short")
+                    eps_array = eps_df.to_numpy()[0:(i+1)]
+                except IndexError:
+                    print(ticker, " : EPS not {} length".format(i+1))
 
-            #===== PLACEHOLDER ARRAY =====#
-            placeholder_array = []
+            #===== PLACEHOLDER ARRAYS =====#
+            placeholder_array_roe = []
             for i in range(len(roe_array)):
-                placeholder_array.append(i)
+                placeholder_array_roe.append(i)
             # put placeholder array in a numpy array
-            count_array = np.array(placeholder_array).reshape(-1, 1)
+            count_array_roe = np.array(placeholder_array_roe).reshape(-1, 1)
+
+            placeholder_array_eps = []
+            for i in range(len(eps_array)):
+                placeholder_array_eps.append(i)
+            # put placeholder array in a numpy array
+            count_array_eps = np.array(placeholder_array_eps).reshape(-1, 1)
 
             #===== MIN & MAX PE RATIOS =====#
             #get pe ratio min max 10 years
-            pe_min = 10
-            pe_max = 30
+            pe_min = company_basic_financials_df[PE_EXCL_LOW_TTM]
+            pe_max = company_basic_financials_df[PE_EXCL_EXTRA_HIGH_TTM]
 
             #===== CURRENT PRICE =====#
             cur_price = self.finnhub_client.quote(ticker)["c"] # 'c' for current price
             
-
-            #=============== ANALYSIS ===============#
-
             # create linear regression models
             model_roe = LinearRegression()
             model_eps = LinearRegression()
             # fit lines from given values
-            model_roe.fit(count_array, roe_array)
-            model_eps.fit(count_array, eps_array)
+            model_roe.fit(count_array_roe, roe_array)
+            model_eps.fit(count_array_eps, eps_array)
             # obtain r values from coefficient of determinations
-            r_value_roe = math.sqrt(model_roe.score(count_array, roe_array))
-            r_value_eps = math.sqrt(model_eps.score(count_array, eps_array))
+            r_value_roe = math.sqrt(model_roe.score(count_array_roe, roe_array))
+            r_value_eps = math.sqrt(model_eps.score(count_array_eps, eps_array))
 
             #===== EPS INDEXING =====#
             a = len(eps_array) - 1 # count for EPS 1 position
             b = 0 # count for EPS 2 position
+
             eps1 = eps_array[a]
-            eps2 = eps_array[b]
+            eps2 = eps_array[b] # latest eps
             # find the earliest positive eps and set position accordingly             
             while(eps1 <= 0):
                 a -= 1
@@ -237,6 +248,7 @@ class Analysis_Finnhub:
                     eps1 = eps_array[a]
                 except IndexError:
                     #print(ticker, "eps 1 out of bounds")
+                    a = len(eps_array) - 1
                     break
             # find the latest positive eps and set position accordingly  
             while(eps2 <= 0):
@@ -245,12 +257,13 @@ class Analysis_Finnhub:
                     eps2 = eps_array[b]
                 except IndexError:
                     #print(ticker, "eps 2 out of bounds")
+                    b = 0
                     break
             length = a - b + 1 # find differences in position between EPS
-
-            #===== EPS AGR =====#
-            cagr_eps = math.pow(eps1 / eps2, 1 / length) - 1
             
+            #===== EPS AGR =====#
+            cagr_eps = math.pow(eps2 / eps1, 1 / length) - 1
+
             #===== PROJECTED VALUE AND GROWTH =====#
             projected_n = 10
 
@@ -258,74 +271,38 @@ class Analysis_Finnhub:
             
             projected_price_min = projected_eps * pe_min
             projected_price_max = projected_eps * pe_max
-
+            
+            p_agr_min = None
+            p_agr_max = None
             try:
                 p_agr_min = 100 * (math.pow(projected_price_min/cur_price, 1 / projected_n) - 1)
                 p_agr_max = 100 * (math.pow(projected_price_max/cur_price, 1 / projected_n) - 1)
             except ValueError:
-                print("value error")
-                p_agr_min = -10101
-                p_agr_max = -10101
-            
-            #correlation
-            if(r_value_roe >= 0.3 and r_value_eps >= 0.3):
-                """
-                a = len(eps_array) - 1 # count for EPS 1 position
-                b = 0 # count for EPS 2 position
-                eps1 = eps_array[a]
-                eps2 = eps_array[b]
-                # find the earliest positive eps and set position accordingly             
-                while(eps1 <= 0):
-                    a -= 1
-                    try:
-                        eps1 = eps_array[a]
-                    except IndexError:
-                        #print(ticker, "eps 1 out of bounds")
-                        break
-                # find the latest positive eps and set position accordingly  
-                while(eps2 <= 0):
-                    b += 1
-                    try:
-                        eps2 = eps_array[b]
-                    except IndexError:
-                        #print(ticker, "eps 2 out of bounds")
-                        break
-                length = a - b + 1 # find differences in position between EPS
-                """
+                print(ticker, ": Projected AGR Value Error")
+                
 
-                # find CAGR of EPS 1, EPS 2, and length
-                if(eps1 > 0 and eps2 > 0 and length > 2):
-                    """
-                    cagr_eps = math.pow(eps1 / eps2, 1 / length) - 1
-                    """
-                    # perform further analysis if CAGR is greater than 0%
-                    if(cagr_eps > 0):
-                        """
-                        projected_n = 10
+            #=============== RETURN ===============#
 
-                        projected_eps = eps2 * math.pow(1 + cagr_eps, projected_n)
-                        
-                        projected_price_min = projected_eps * pe_min
-                        projected_price_max = projected_eps * pe_max
+            return [ticker, 
+                    length, 
+                    self.round_none(r_value_roe),
+                    self.round_none(r_value_eps),
+                    self.round_none(eps1), 
+                    self.round_none(eps2), 
+                    self.round_none(cagr_eps), 
+                    self.round_none(pe_min), 
+                    self.round_none(pe_max), 
+                    self.round_none(p_agr_min), 
+                    self.round_none(p_agr_max)]
 
-                        p_agr_min = 100 * (math.pow(projected_price_min/cur_price, 1 / projected_n) - 1)
-                        p_agr_max = 100 * (math.pow(projected_price_max/cur_price, 1 / projected_n) - 1)
-                        """
-                        print(ticker, "- Projected growth max:", p_agr_max)
-                        
-                    else:
-                        print(ticker, "- CAGR is negative")
-
-                else:
-                    print(ticker, "- EPS is negative or n is 2 or less")
-
-            else:
-                print(ticker, "- no strong correlation")
-
-            return [ticker, length, cagr_eps, pe_min, pe_max, p_agr_min, p_agr_max]
-            
         except KeyError:
-            print(ticker, "- not found")
+            print(ticker, " : not found")
+
+    def round_none(self, value):
+        if value is None:
+            return None
+        else:
+            return round(value, 3)
 
 if __name__ == "__main__":
     client = finnhub.Client(api_key="bucae7f48v6oa2u4ng20")
@@ -335,5 +312,6 @@ if __name__ == "__main__":
                                         "Data/{}_income_annual.csv".format(sector),
                                         "Data/{}_cashflows_ttm.csv".format(sector), 
                                         "Data/{}_cashflows_annual.csv".format(sector), 
+                                        "Data/{}_basic_financials.csv".format(sector),
                                         "Data/{}_estimates.csv".format(sector))
-    analysis.buffett('JJSF')
+    print(analysis.buffett('SYY'))

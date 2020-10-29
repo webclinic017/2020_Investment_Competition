@@ -302,6 +302,7 @@ def write_basic_financials(client, input_file_path, output_file_path):
 
     # Writing headers of CSV file 
     csv_writer.writerow([
+        SYMBOL,
         PE_BASIC_EXCL_EXTRA_TTM,
         PE_EXCL_EXTRA_ANNUAL,
         PE_EXCL_EXTRA_HIGH_TTM,
@@ -313,22 +314,20 @@ def write_basic_financials(client, input_file_path, output_file_path):
 
     # writing down companeis listed in input ticker csv file
     for ticker in ticker_reader:
-        json_data = finnhub_client.company_revenue_estimates(ticker) # obtaining data from Finnhub API
+        json_data = finnhub_client.company_basic_financials(ticker, 'all') # obtaining data from Finnhub API
         ticker = json_data[SYMBOL] # getting ticker
-        
-        # check if ticker is contained in database
+        section = json_data['metric']
         try:
-            for section in json_data["data"]:
-                csv_writer.writerow([
-                    ticker,
-                    getValue(section, PE_BASIC_EXCL_EXTRA_TTM),
-                    getValue(section, PE_EXCL_EXTRA_ANNUAL),
-                    getValue(section, PE_EXCL_EXTRA_HIGH_TTM),
-                    getValue(section, PE_EXCL_EXTRA_TTM),
-                    getValue(section, PE_EXCL_LOW_TTM),
-                    getValue(section, PE_INCL_EXTRA_TTM),
-                    getValue(section, PE_NORMALIZED_ANNUAL)
-                ])
+            csv_writer.writerow([
+                ticker,
+                getValue(section, PE_BASIC_EXCL_EXTRA_TTM),
+                getValue(section, PE_EXCL_EXTRA_ANNUAL),
+                getValue(section, PE_EXCL_EXTRA_HIGH_TTM),
+                getValue(section, PE_EXCL_EXTRA_TTM),
+                getValue(section, PE_EXCL_LOW_TTM),
+                getValue(section, PE_INCL_EXTRA_TTM),
+                getValue(section, PE_NORMALIZED_ANNUAL)
+            ])
         except:
             print(ticker, ", not found")
 
