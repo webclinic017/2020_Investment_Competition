@@ -193,6 +193,7 @@ class Analysis_Finnhub:
                     roe_array = roe_df.to_numpy()[0:(i+1)]
                 except IndexError:
                     print(ticker, " : ROE not {} length".format(i+1))
+            roe_array = roe_array[::-1]
 
             #===== Company EPS =====#
             eps_array = []
@@ -212,6 +213,7 @@ class Analysis_Finnhub:
                     eps_array = eps_df.to_numpy()[0:(i+1)]
                 except IndexError:
                     print(ticker, " : EPS not {} length".format(i+1))
+            eps_array = eps_array[::-1]
             
             #===== PLACEHOLDER ARRAYS =====#
             placeholder_array_roe = []
@@ -234,6 +236,7 @@ class Analysis_Finnhub:
             #===== CURRENT PRICE =====#
             cur_price = self.finnhub_client.quote(ticker)["c"] # 'c' for current price
             
+            #=====  LINEAR REGRESSION =====#
             # create linear regression models
             model_roe = LinearRegression()
             model_eps = LinearRegression()
@@ -244,12 +247,14 @@ class Analysis_Finnhub:
             r_value_roe = math.sqrt(model_roe.score(count_array_roe, roe_array))
             r_value_eps = math.sqrt(model_eps.score(count_array_eps, eps_array))
 
+            print(eps_array, r_value_eps)
+
             #===== EPS INDEXING =====#
             a = len(eps_array) - 1 # count for EPS 1 position
             b = 0 # count for EPS 2 position
 
-            eps1 = eps_array[a]
-            eps2 = eps_array[b] # latest eps
+            eps1 = eps_array[a] # latest eps
+            eps2 = eps_array[b] 
             # find the earliest positive eps and set position accordingly             
             while(eps1 <= 0):
                 a -= 1
@@ -271,17 +276,17 @@ class Analysis_Finnhub:
             length = a - b + 1 # find differences in position between EPS
             
             #===== EPS AGR =====#
-            cagr_eps = math.pow(eps2 / eps1, 1 / length) - 1
+            cagr_eps = math.pow(eps1 / eps2, 1 / length) - 1
 
             #===== PROJECTED VALUE AND GROWTH =====#
             projected_n = 10
 
-            projected_eps = eps2 * math.pow(1 + cagr_eps, projected_n)
+            projected_eps = eps1 * math.pow(1 + cagr_eps, projected_n)
             
             projected_price_min = projected_eps * pe_min
             projected_price_max = projected_eps * pe_max
             
-            p_agr_min = None
+            p_agr_min = -1000
             p_agr_max = None
             try:
                 p_agr_min = 100 * (math.pow(projected_price_min/cur_price, 1 / projected_n) - 1)
@@ -292,17 +297,21 @@ class Analysis_Finnhub:
 
             #=============== RETURN ===============#
 
-            return [ticker, 
-                    length, 
-                    self.round_none(r_value_roe),
-                    self.round_none(r_value_eps),
-                    self.round_none(eps1), 
-                    self.round_none(eps2), 
-                    self.round_none(cagr_eps), 
-                    self.round_none(pe_min), 
-                    self.round_none(pe_max), 
-                    self.round_none(p_agr_min), 
-                    self.round_none(p_agr_max)]
+            return {"ticker": ticker, 
+                    "length": length, 
+                    "r_value_roe": self.round_none(r_value_roe),
+                    "r_value_eps": self.round_none(r_value_eps),
+                    "eps1": self.round_none(eps1), 
+                    "eps2": self.round_none(eps2), 
+                    "cagr_eps": self.round_none(cagr_eps), 
+                    "pe_min": self.round_none(pe_min), 
+                    "pe_max": self.round_none(pe_max), 
+                    "p_agr_min": self.round_none(p_agr_min), 
+                    "p_agr_max": self.round_none(p_agr_max),
+                    "eps_array": eps_array,
+                    "count_array": count_array_eps,
+                    "coef": model_eps.coef_,
+                    "intercept": model_eps.intercept_}
 
         except KeyError:
             print(ticker, " : not found")
