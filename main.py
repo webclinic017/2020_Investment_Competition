@@ -8,7 +8,7 @@ from docx import Document
 from docx.shared import Inches
 
 #===== INPUT PARAMETERS =====#
-sector = 'healthcare'
+sector = 'technology'
 key = "bucae7f48v6oa2u4ng20"
 
 buffett_url = "/Users/ezzatsuhaime/Desktop/dcf_{}.csv".format(sector)
