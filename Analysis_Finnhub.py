@@ -324,7 +324,7 @@ class Analysis_Finnhub:
 
 if __name__ == "__main__":
     client = finnhub.Client(api_key="bucae7f48v6oa2u4ng20")
-    sector = "staples"
+    sector = "technology"
     analysis = Analysis_Finnhub(client, "Data/{}_balance_annual.csv".format(sector), 
                                         "Data/{}_income_ttm.csv".format(sector), 
                                         "Data/{}_income_annual.csv".format(sector),
@@ -332,4 +332,4 @@ if __name__ == "__main__":
                                         "Data/{}_cashflows_annual.csv".format(sector), 
                                         "Data/{}_basic_financials.csv".format(sector),
                                         "Data/{}_estimates.csv".format(sector))
-    analysis.buffett('CPB')
+    print(analysis.buffett('GOOGL'))

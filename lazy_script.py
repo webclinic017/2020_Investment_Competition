@@ -8,13 +8,13 @@ finnhub_client = finnhub.Client(api_key=key2)
 
 #print(finnhub_client.financials('TEVA', 'bs', 'annual'))
 
-sector = 'staples'
+sector = 'technology'
 
 #=== TICKERS ===#
 #get_us_tickers("Input/{}.csv".format(sector), "US_Tickers/{}.csv".format(sector))
 
 #=== DATA ===#
-write_financials(finnhub_client, "US_Tickers/{}.csv".format(sector), "Data/{}_income_annual.csv".format(sector), 'ic', 'annual')
+#write_financials(finnhub_client, "US_Tickers/{}.csv".format(sector), "Data/{}_income_annual.csv".format(sector), 'ic', 'annual')
 #write_financials(finnhub_client, "US_Tickers/{}.csv".format(sector), "Data/{}_income_ttm.csv".format(sector), 'ic', 'annual')
 
 #write_financials(finnhub_client, "US_Tickers/{}.csv".format(sector), "Data/{}_cashflows_annual.csv".format(sector), 'cf', 'annual')
