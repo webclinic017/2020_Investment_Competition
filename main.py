@@ -20,7 +20,6 @@ finnhub_client = finnhub.Client(api_key=key)
 
 #===== US COMPANIES =====#
 us_tickers = "US_Tickers/{}.csv".format(sector) # file path name
-hf.get_us_tickers("Input/{}.csv".format(sector), us_tickers)
 
 #===== FILES =====#
 document = Document()
