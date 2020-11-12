@@ -8,18 +8,19 @@ from docx import Document
 from docx.shared import Inches
 
 #===== INPUT PARAMETERS =====#
-sector = 'technology'
-key = "bucae7f48v6oa2u4ng20"
+sector = 'h'
+key1 = 'bucae7f48v6oa2u4ng20'
+key2 = 'btts0j748v6ojt2hie60'
 
 buffett_url = "/Users/ezzatsuhaime/Desktop/dcf_{}.csv".format(sector)
 dcf_url = "/Users/ezzatsuhaime/Desktop/dcf_{}.docx".format(sector)
 
 
 #===== FINNHUB CLIENT =====#
-finnhub_client = finnhub.Client(api_key=key)
+finnhub_client = finnhub.Client(api_key=key2)
 
 #===== US COMPANIES =====#
-us_tickers = "US_Tickers/{}.csv".format(sector) # file path name
+us_tickers = "Tickers/{}.csv".format(sector) # file path name
 
 #===== FILES =====#
 document = Document()

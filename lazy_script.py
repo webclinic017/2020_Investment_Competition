@@ -8,18 +8,18 @@ finnhub_client = finnhub.Client(api_key=key2)
 
 #print(finnhub_client.financials('TEVA', 'bs', 'annual'))
 
-sector = 'technology'
+sector = 'h'
 
 #=== TICKERS ===#
-#get_us_tickers("Input/{}.csv".format(sector), "US_Tickers/{}.csv".format(sector))
+#get_us_tickers("Input/{}.csv".format(sector), "Tickers/{}.csv".format(sector))
 
 #=== DATA ===#
-#write_financials(finnhub_client, "US_Tickers/{}.csv".format(sector), "Data/{}_income_annual.csv".format(sector), 'ic', 'annual')
-#write_financials(finnhub_client, "US_Tickers/{}.csv".format(sector), "Data/{}_income_ttm.csv".format(sector), 'ic', 'annual')
+#write_financials(finnhub_client, "Tickers/{}.csv".format(sector), "Data/{}_income_annual.csv".format(sector), 'ic', 'annual')
+#write_financials(finnhub_client, "Tickers/{}.csv".format(sector), "Data/{}_income_ttm.csv".format(sector), 'ic', 'annual')
 
-#write_financials(finnhub_client, "US_Tickers/{}.csv".format(sector), "Data/{}_cashflows_annual.csv".format(sector), 'cf', 'annual')
-#write_financials(finnhub_client, "US_Tickers/{}.csv".format(sector), "Data/{}_cashflows_ttm.csv".format(sector), 'cf', 'annual')
+#write_financials(finnhub_client, "Tickers/{}.csv".format(sector), "Data/{}_cashflows_annual.csv".format(sector), 'cf', 'annual')
+#write_financials(finnhub_client, "Tickers/{}.csv".format(sector), "Data/{}_cashflows_ttm.csv".format(sector), 'cf', 'annual')
 
-#write_basic_financials(finnhub_client, "US_Tickers/{}.csv".format(sector), "Data/{}_basic_financials.csv".format(sector))
-#write_financials(finnhub_client, "US_Tickers/{}.csv".format(sector), "Data/{}_balance_annual.csv".format(sector), 'bs', 'annual')
-#write_estimates(finnhub_client, "US_Tickers/{}.csv".format(sector), "Data/{}_estimates.csv".format(sector), "annual")
+#write_basic_financials(finnhub_client, "Tickers/{}.csv".format(sector), "Data/{}_basic_financials.csv".format(sector))
+#write_financials(finnhub_client, "Tickers/{}.csv".format(sector), "Data/{}_balance_annual.csv".format(sector), 'bs', 'annual')
+write_estimates(finnhub_client, "Tickers/{}.csv".format(sector), "Data/{}_estimates.csv".format(sector), "annual")
