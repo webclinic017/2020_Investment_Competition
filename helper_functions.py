@@ -1,6 +1,7 @@
 import csv
 import json
 import finnhub
+import requests
 from metrics import *
 
 
@@ -294,6 +295,7 @@ def write_estimates(client, input_file_path, output_file_path, frequency = 'annu
         except:
             print(ticker, ", not found")
 
+
 def write_basic_financials(client, input_file_path, output_file_path):
     
     # Setup client
@@ -344,3 +346,46 @@ def getValue(list, metric):
         return None
 
 
+def get_eod_prices(tickers, output_file_path, token):
+
+    # Setup csv writer
+    output_csv = open(output_file_path, "w", newline = '')
+    csv_writer = csv.writer(output_csv, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    price_data = []
+    for ticker in tickers:
+        
+        requestResponse = requests.get(
+            "https://api.tiingo.com/tiingo/daily/{}/prices?startDate=2010-01-02&columns=adjClose&token={}".format(ticker, token), headers=headers)
+        json_obj = requestResponse.json()
+        price_data.append(json_obj)
+
+    stock_count = len(price_data) # How many stocks
+    sample_size = len(price_data[0]) # Length of days 
+
+    #=== Label header row ===#
+    
+    header_row = tickers
+    header_row.insert(0, 'date')
+    csv_writer.writerow(header_row)
+    
+    for i in range(sample_size):
+        
+        # Row that will contain date and prices of companies
+        price_row = []
+
+        #=== Obtain Date ===#
+        date = price_data[0][i]['date'].split('T')[0]
+        price_row.append(date)
+        
+        #=== Obtain EOD Price ===#
+        for j in range(stock_count):
+            stock_price = round(price_data[j][i]['adjClose'], 2)
+            price_row.append(stock_price)
+        
+        # Write row
+        csv_writer.writerow(price_row)
