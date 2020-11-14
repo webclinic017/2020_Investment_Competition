@@ -247,8 +247,6 @@ class Analysis_Finnhub:
             r_value_roe = math.sqrt(model_roe.score(count_array_roe, roe_array))
             r_value_eps = math.sqrt(model_eps.score(count_array_eps, eps_array))
 
-            print(eps_array, r_value_eps)
-
             #===== EPS INDEXING =====#
             a = len(eps_array) - 1 # count for EPS 1 position
             b = 0 # count for EPS 2 position

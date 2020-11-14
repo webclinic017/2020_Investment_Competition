@@ -59,7 +59,7 @@ def optimize(sector, key, token, ticker_file_path, data_file_path):
         # Optimize
         ef = EfficientFrontier(mu, S)
         ef.max_sharpe()
-        cleaned_weights = ef.clean_weights()
+        ef.clean_weights()
 
         # Print out to terminal
         ef.portfolio_performance(verbose=True)
