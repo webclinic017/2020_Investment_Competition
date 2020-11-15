@@ -3,10 +3,10 @@ import Analysis_Finnhub as analysis
 import pandas as pd
 import csv
 import finnhub
-from pypfopt.expected_returns import mean_historical_return
-from pypfopt.risk_models import CovarianceShrinkage
+from pypfopt.expected_returns import mean_historical_return, ema_historical_return
+from pypfopt.risk_models import CovarianceShrinkage, sample_cov
 from pypfopt.efficient_frontier import EfficientFrontier
-from pypfopt import CLA, plotting
+from pypfopt import CLA, plotting, objective_functions
 
 
 
@@ -38,7 +38,7 @@ def optimize(sector, key, token, ticker_file_path, data_file_path):
             
             data_array = ana.buffett(ticker)
 
-            projected_growth_rate = (data_array["pe_min"] + data_array["pe_max"]) / 2
+            projected_growth_rate = 0.75*data_array["p_agr_min"] + 0.25*data_array["p_agr_max"]
 
             return_data[ticker] = projected_growth_rate / 100
 
@@ -51,19 +51,25 @@ def optimize(sector, key, token, ticker_file_path, data_file_path):
         prices_df.set_index(["date"], inplace=True)
         
         # Get returns
-        mu = pd.Series(return_data)
-        #mu = mean_historical_return(prices_df)
+        mu_val = pd.Series(return_data)
+        mu_mean = mean_historical_return(prices_df)
+        mu = mu_mean*0.25 + mu_val*0.75
+        print(mu_mean)
+        print(mu)
 
         # Get risk
-        S = CovarianceShrinkage(prices_df).ledoit_wolf()
+        S = CovarianceShrinkage(prices_df).ledoit_wolf(shrinkage_target = "constant_variance")
+        #S = sample_cov(prices_df)
+        
         # Optimize
         ef = EfficientFrontier(mu, S)
+        ef.add_objective(objective_functions.L2_reg, gamma=0.1)
         ef.max_sharpe()
-        ef.clean_weights()
+        weights = ef.clean_weights()
 
         # Print out to terminal
+        print(weights)
         ef.portfolio_performance(verbose=True)
-
         ef.save_weights_to_file("weights.txt")
 
 

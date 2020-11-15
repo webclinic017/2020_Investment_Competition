@@ -4,7 +4,7 @@ import finnhub
 key1 = 'bucae7f48v6oa2u4ng20'
 key2 = 'btts0j748v6ojt2hie60'
 
-finnhub_client = finnhub.Client(api_key=key2)
+finnhub_client = finnhub.Client(api_key=key1)
 
 
 sector = 'portfolio'
