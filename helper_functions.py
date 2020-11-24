@@ -360,7 +360,7 @@ def get_eod_prices(tickers, output_file_path, token):
     for ticker in tickers:
         
         requestResponse = requests.get(
-            "https://api.tiingo.com/tiingo/daily/{}/prices?startDate=2010-01-02&columns=adjClose&token={}".format(ticker, token), headers=headers)
+            "https://api.tiingo.com/tiingo/daily/{}/prices?startDate=2015-01-02&columns=adjClose&token={}".format(ticker, token), headers=headers)
         json_obj = requestResponse.json()
         price_data.append(json_obj)
 

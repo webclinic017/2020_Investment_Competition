@@ -1,10 +1,10 @@
-from helper_functions import get_us_tickers, write_financials, write_estimates, write_basic_financials
+from helper_functions import get_us_tickers, write_financials, write_estimates, write_basic_financials, get_eod_prices
 import finnhub
 
 key1 = 'bucae7f48v6oa2u4ng20'
 key2 = 'btts0j748v6ojt2hie60'
 
-finnhub_client = finnhub.Client(api_key=key1)
+finnhub_client = finnhub.Client(api_key=key2)
 
 
 sector = 'portfolio'

@@ -42,7 +42,7 @@ def optimize(sector, key, token, ticker_file_path, data_file_path):
 
             return_data[ticker] = projected_growth_rate / 100
 
-        #get_eod_prices(ticker_array, data_file_path, token)
+        get_eod_prices(ticker_array, data_file_path, token)
 
     #===== OPTIMIZATION =====#
     with open(data_file_path, "r", newline = '') as price_sheet:
@@ -54,8 +54,8 @@ def optimize(sector, key, token, ticker_file_path, data_file_path):
         mu_val = pd.Series(return_data)
         mu_mean = mean_historical_return(prices_df)
         mu = mu_mean*0.25 + mu_val*0.75
+        print(mu_val)
         print(mu_mean)
-        print(mu)
 
         # Get risk
         S = CovarianceShrinkage(prices_df).ledoit_wolf(shrinkage_target = "constant_variance")
