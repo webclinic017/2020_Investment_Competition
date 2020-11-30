@@ -13,7 +13,7 @@ from pypfopt import CLA, plotting, objective_functions
 def optimize(sector, key, token, ticker_file_path, data_file_path):
 
     #===== FINNHUB CLIENT =====#
-    finnhub_client = finnhub.Client(api_key=key2)
+    finnhub_client = finnhub.Client(api_key=key1)
 
     #===== ANALYSIS INSTANCE =====#
     ana = analysis.Analysis_Finnhub(finnhub_client, "Data/{}_balance_annual.csv".format(sector), 
@@ -63,7 +63,7 @@ def optimize(sector, key, token, ticker_file_path, data_file_path):
         
         # Optimize
         ef = EfficientFrontier(mu, S)
-        ef.add_objective(objective_functions.L2_reg, gamma=0.1)
+        ef.add_objective(objective_functions.L2_reg, gamma=0.2)
         ef.max_sharpe()
         weights = ef.clean_weights()
 
