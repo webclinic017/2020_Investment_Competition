@@ -33,6 +33,7 @@ with open('constituents_csv.csv', 'r', newline='') as csvfile:
         # remove "Symbol" header from list
         if "Symbol" in sp_list: sp_list.remove("Symbol")
 
+print(sp_list)
 
 ticker = "LYV"
 

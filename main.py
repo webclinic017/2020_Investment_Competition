@@ -100,7 +100,7 @@ def main(sector, key, output_url):
 
 if __name__ == "__main__":
     #===== INPUT PARAMETERS =====#
-    sector = 'technology'
+    sector = 'staples'
     key1 = 'bucae7f48v6oa2u4ng20'
     key2 = 'btts0j748v6ojt2hie60'
     url = "/Users/ezzatsuhaime/Desktop/dcf_{}.docx".format(sector)
